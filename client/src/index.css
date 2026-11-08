@@ -199,16 +199,8 @@ ul {
 .main-content { flex: 1; }
 
 .page-section {
-  display: none;
-  opacity: 0;
-  transform: translateY(6px);
-  transition: opacity 0.25s ease, transform 0.25s ease;
-}
-
-.page-section.active {
   display: block;
-  opacity: 1;
-  transform: translateY(0);
+  animation: fadeIn 0.2s ease-out;
 }
 
 .navbar-header {
@@ -859,4 +851,15 @@ ul {
   .vitem-main { flex-direction: column; }
   .udash-header { flex-direction: column; align-items: flex-start; }
   .ob-container { flex-direction: column; text-align: center; }
+}
+
+#root {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
 }
