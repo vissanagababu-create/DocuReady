@@ -1,0 +1,889 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DocuReady — Know What You Need Before You Go</title>
+  <meta name="description" content="DocuReady helps you prepare the documents you may need before visiting a college, office, bank, employer or other organization.">
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
+  
+  <!-- Main Stylesheet -->
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- Toast Notification Container -->
+  <div id="toast-container" class="toast-container" aria-live="polite"></div>
+
+  <!-- Compare Processes Modal -->
+  <div id="compare-modal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="compare-modal-title">
+    <div class="modal-card">
+      <button class="modal-close-btn" id="close-compare-modal-btn" aria-label="Close compare modal">×</button>
+      <div class="cgo-header">
+        <span class="badge badge-accent mb-2">COMPARE TOOL</span>
+        <h2 id="compare-modal-title">Compare Process Requirements</h2>
+        <p class="text-muted">Select two services below to view common required documents vs unique requirements.</p>
+      </div>
+
+      <div class="grid grid-2 gap-3 mt-3">
+        <div class="form-group">
+          <label for="compare-select-a">Process A:</label>
+          <select id="compare-select-a" class="form-select"></select>
+        </div>
+        <div class="form-group">
+          <label for="compare-select-b">Process B:</label>
+          <select id="compare-select-b" class="form-select"></select>
+        </div>
+      </div>
+
+      <div id="compare-matrix-content">
+        <!-- Rendered dynamically via JS -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Final "Check Before I Go" Full Modal -->
+  <div id="check-before-go-modal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+    <div class="modal-card">
+      <button class="modal-close-btn" id="close-modal-btn" aria-label="Close modal">×</button>
+      <div id="modal-review-content">
+        <!-- Injected dynamically via JS -->
+      </div>
+      <div class="modal-actions-bar mt-4">
+        <button class="btn btn-primary btn-sm" id="print-modal-btn">
+          🖨️ Print Final Review
+        </button>
+        <button class="btn btn-outline btn-sm" onclick="document.getElementById('check-before-go-modal').classList.add('hidden')">
+          Close Review
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Header Navigation -->
+  <header class="navbar-header">
+    <div class="container nav-container">
+      <a href="#home" class="brand-logo" id="brand-logo-link" aria-label="DocuReady Homepage">
+        <div class="logo-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+            <polyline points="14 2 14 8 20 8"></polyline>
+            <path d="m9 15 2 2 4-4"></path>
+          </svg>
+        </div>
+        <span class="brand-name">Docu<span class="brand-highlight">Ready</span></span>
+      </a>
+
+      <!-- Desktop Navigation Links -->
+      <nav class="desktop-nav" aria-label="Main Navigation">
+        <a href="#home" class="nav-link active" data-page="home">Home</a>
+        <a href="#services" class="nav-link" data-page="services">Services</a>
+        <a href="#mydocuments" class="nav-link" data-page="mydocuments">My Documents</a>
+        <a href="#about" class="nav-link" data-page="about">About & Data</a>
+      </nav>
+
+      <!-- Action Button & Mobile Menu Toggle -->
+      <div class="nav-actions">
+        <a href="#services" class="btn btn-sm btn-primary header-cta" data-page="services">Find Checklist</a>
+        <button class="mobile-toggle" id="mobile-toggle-btn" aria-label="Toggle navigation menu">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon-menu">
+            <line x1="3" y1="12" x2="21" y2="12"></line>
+            <line x1="3" y1="6" x2="21" y2="6"></line>
+            <line x1="3" y1="18" x2="21" y2="18"></line>
+          </svg>
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon-close">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Mobile Drawer Menu -->
+    <div class="mobile-drawer" id="mobile-drawer">
+      <div class="mobile-nav-links">
+        <a href="#home" class="mobile-nav-link active" data-page="home">Home</a>
+        <a href="#services" class="mobile-nav-link" data-page="services">Services & Processes</a>
+        <a href="#mydocuments" class="mobile-nav-link" data-page="mydocuments">My Documents Vault</a>
+        <a href="#about" class="mobile-nav-link" data-page="about">About & Settings</a>
+      </div>
+      <div class="mobile-drawer-footer">
+        <a href="#services" class="btn btn-primary btn-block" data-page="services">Check Requirements Now</a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content Wrapper -->
+  <main class="main-content">
+
+    <!-- PAGE 1: HOME -->
+    <section id="home" class="page-section active">
+      
+      <!-- First Visit Onboarding Banner -->
+      <div id="onboarding-banner" class="onboarding-banner hidden">
+        <div class="container ob-container">
+          <div class="ob-text">
+            <strong>👋 Welcome to DocuReady!</strong>
+            <span>1. Choose a process &nbsp;|&nbsp; 2. Review requirements &nbsp;|&nbsp; 3. Track your documents &nbsp;|&nbsp; 4. Check your readiness</span>
+          </div>
+          <div class="ob-actions">
+            <button class="btn btn-sm btn-primary" id="start-onboarding-btn">Get Started</button>
+            <button class="btn btn-sm btn-outline" id="dismiss-onboarding-btn">Skip</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Hero Banner -->
+      <div class="hero-section">
+        <div class="container hero-container">
+          <div class="hero-text-content">
+            <div class="badge badge-accent mb-3">
+              <span class="pulse-dot"></span> SMART PREPARATION TOOL
+            </div>
+            <h1 class="hero-headline">Know What You Need Before You Go.</h1>
+            <p class="hero-description">
+              DocuReady helps you prepare the documents you may need before visiting a college, office, bank, employer or other organization.
+            </p>
+            <div class="hero-cta-group">
+              <a href="#services" class="btn btn-lg btn-primary" data-page="services">
+                Check Requirements
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+              </a>
+              <a href="#about" class="btn btn-lg btn-outline" data-page="about">
+                How It Works
+              </a>
+            </div>
+            
+            <div class="hero-disclaimer-box">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-accent"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+              <span><strong>General Guidance:</strong> Requirements may vary by location and organization. Always verify final requirements directly with the relevant organization.</span>
+            </div>
+          </div>
+
+          <!-- Hero Visual Interactive Preview Card -->
+          <div class="hero-visual-content">
+            <div class="visual-card-wrapper">
+              <div class="visual-card">
+                <div class="visual-card-header">
+                  <div class="vcard-title-group">
+                    <span class="vcard-tag">College / University</span>
+                    <h3>Bonafide Certificate Preview</h3>
+                  </div>
+                  <span class="vcard-status-badge partial">Partially ready (75%)</span>
+                </div>
+                <div class="visual-progress-bar">
+                  <div class="vbar-fill" style="width: 75%;"></div>
+                </div>
+                
+                <div class="visual-checklist-list">
+                  <label class="vcheck-item checked">
+                    <input type="checkbox" class="hero-check-input" checked aria-label="Student ID Card">
+                    <span>Student ID Card</span>
+                  </label>
+                  <label class="vcheck-item checked">
+                    <input type="checkbox" class="hero-check-input" checked aria-label="Application Form">
+                    <span>Application Form</span>
+                  </label>
+                  <label class="vcheck-item checked">
+                    <input type="checkbox" class="hero-check-input" checked aria-label="Passport Photo">
+                    <span>Passport Photo</span>
+                  </label>
+                  <label class="vcheck-item">
+                    <input type="checkbox" class="hero-check-input" aria-label="Fee Receipt">
+                    <span>Fee Receipt (Copy)</span>
+                  </label>
+                </div>
+                
+                <div class="visual-card-footer">
+                  <span class="vfooter-msg">⚡ 3 of 4 items checked. 1 item remaining.</span>
+                </div>
+              </div>
+
+              <!-- Floating Accent Badge -->
+              <div class="floating-badge badge-1">
+                <div class="fbadge-icon">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+                </div>
+                <div>
+                  <strong>Local & Private</strong>
+                  <span>Stored on your device</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Personalized User Readiness Dashboard Summary -->
+      <div class="container mt-5">
+        <div id="home-user-dashboard">
+          <!-- Injected dynamically via JS -->
+        </div>
+      </div>
+
+      <!-- Feature Cards Section -->
+      <div class="features-section">
+        <div class="container">
+          <div class="section-header text-center mb-5">
+            <h2 class="section-title">Everything You Need for a Smooth Visit</h2>
+            <p class="section-subtitle">Designed to turn confusing requirement lists into simple, actionable steps.</p>
+          </div>
+
+          <div class="grid grid-3 gap-4">
+            <!-- Feature Card 1 -->
+            <div class="feature-card">
+              <div class="feature-icon icon-blue">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"></path><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path></svg>
+              </div>
+              <h3 class="feature-title">Know What You Need</h3>
+              <p class="feature-text">Access general checklists for common tasks across colleges, banks, employers, and government offices.</p>
+            </div>
+
+            <!-- Feature Card 2 -->
+            <div class="feature-card">
+              <div class="feature-icon icon-emerald">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
+              </div>
+              <h3 class="feature-title">Track What You Have</h3>
+              <p class="feature-text">Use your personal Document Vault to record Originals, Photocopies, Digital scans, and Expiry dates.</p>
+            </div>
+
+            <!-- Feature Card 3 -->
+            <div class="feature-card">
+              <div class="feature-icon icon-purple">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+              </div>
+              <h3 class="feature-title">Check Your Readiness</h3>
+              <p class="feature-text">Get an instant readiness score, format warnings, and a final "Check Before I Go" review before visiting.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 4-Step How It Works Flow -->
+      <div class="how-it-works-section py-4">
+        <div class="container">
+          <div class="section-header text-center mb-4">
+            <span class="badge badge-accent mb-2">SIMPLE FLOW</span>
+            <h2 class="section-title">How DocuReady Works</h2>
+          </div>
+          <div class="grid grid-4 gap-3">
+            <div class="step-card">
+              <div class="step-num">01</div>
+              <h4>Choose a process</h4>
+              <p>Browse categories like College, Banking, Jobs, Government, or Address Services.</p>
+            </div>
+            <div class="step-card">
+              <div class="step-num">02</div>
+              <h4>Review requirements</h4>
+              <p>Examine mandatory and optional documents along with helpful "Why?" explanations.</p>
+            </div>
+            <div class="step-card">
+              <div class="step-num">03</div>
+              <h4>Check what you have</h4>
+              <p>Tick off items you possess and cross-check format status with your local Document Vault.</p>
+            </div>
+            <div class="step-card">
+              <div class="step-num">04</div>
+              <h4>Check your readiness</h4>
+              <p>View your completion percentage and clear "Check Before I Go" summary before your visit.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick Popular Processes Showcase -->
+      <div class="popular-section">
+        <div class="container">
+          <div class="popular-box">
+            <div class="popular-header">
+              <div>
+                <span class="badge badge-primary mb-2">Frequently Used</span>
+                <h3>Popular Checklists</h3>
+              </div>
+              <a href="#services" class="link-btn" data-page="services">View All Services →</a>
+            </div>
+            <div class="grid grid-4 gap-3 mt-4" id="quick-popular-grid">
+              <!-- Dynamically populated via JS -->
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- PAGE 2: SERVICES -->
+    <section id="services" class="page-section">
+      <div class="container py-4">
+        <!-- Page Title Header -->
+        <div class="section-header">
+          <div class="badge badge-accent mb-2">Service Library</div>
+          <div class="srv-header-flex">
+            <div>
+              <h1 class="page-headline">Select a Process to Get Started</h1>
+              <p class="page-subheadline">Browse categorized services below or use search to locate specific process requirements.</p>
+            </div>
+            <button class="btn btn-outline btn-sm" id="open-compare-btn">
+              ⚖️ Compare Processes
+            </button>
+          </div>
+        </div>
+
+        <!-- General Guidance Disclaimer -->
+        <div class="alert alert-info mb-4" role="alert">
+          <div class="alert-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+          </div>
+          <div class="alert-content">
+            <strong>General Guidance Disclaimer:</strong> DocuReady provides general preparation guidance. Requirements may vary by organization, location and process. Always verify the final requirements with the relevant organization.
+          </div>
+        </div>
+
+        <!-- Filter & Search Controls -->
+        <div class="filter-controls-wrapper mb-4">
+          <div class="search-box">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="search-icon"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+            <input type="text" id="services-search-input" placeholder="Search by title, category, keywords or document name..." aria-label="Search processes">
+            <button class="clear-search-btn hidden" id="clear-services-search" title="Clear search">×</button>
+          </div>
+
+          <div class="category-tabs-scroll" id="category-tabs-container">
+            <button class="tab-chip active" data-category="all">All Categories</button>
+            <button class="tab-chip" data-category="favorites">★ Favorites</button>
+            <button class="tab-chip" data-category="college">College / University</button>
+            <button class="tab-chip" data-category="banking">Banking</button>
+            <button class="tab-chip" data-category="jobs">Jobs / Employment</button>
+            <button class="tab-chip" data-category="govt">Government Services</button>
+            <button class="tab-chip" data-category="rental">Rental / Address</button>
+            <button class="tab-chip" data-category="scholarship">Scholarships</button>
+          </div>
+        </div>
+
+        <!-- Process Cards Grid -->
+        <div class="grid grid-3 gap-4" id="services-grid">
+          <!-- Populated by JS -->
+        </div>
+
+        <!-- Empty Search State -->
+        <div class="empty-state hidden" id="services-empty-state">
+          <div class="empty-icon">🔍</div>
+          <h3>No matching processes found.</h3>
+          <p>Try searching for a different keyword or select another category tab.</p>
+          <button class="btn btn-outline btn-sm mt-3" id="reset-services-filter">Clear Search</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- PAGE 3: PROCESS CHECKLIST -->
+    <section id="checklist" class="page-section">
+      <div class="container py-4">
+        <!-- Back Button -->
+        <div class="mb-3">
+          <button class="btn-back" id="back-to-services-btn">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+            Back to Services
+          </button>
+        </div>
+
+        <!-- Process Checklist Header -->
+        <div class="checklist-header-card mb-4" id="checklist-header-container">
+          <!-- Populated dynamically via JS -->
+        </div>
+
+        <!-- Progress Overview Banner -->
+        <div class="progress-overview-card mb-4">
+          <div class="progress-overview-top">
+            <div>
+              <span class="readiness-label">Your Preparation Status</span>
+              <h2 class="readiness-status-title" id="checklist-status-title">Checking status...</h2>
+            </div>
+            <div class="completion-number-badge" id="checklist-percentage-badge">0%</div>
+          </div>
+
+          <div class="main-progress-bar">
+            <div class="main-progress-fill" id="checklist-progress-fill" style="width: 0%;"></div>
+          </div>
+
+          <div class="progress-overview-bottom">
+            <span class="items-count-text" id="checklist-items-count">0 of 0 items prepared</span>
+            <span class="status-tip-msg" id="checklist-tip-msg">Loading...</span>
+          </div>
+        </div>
+
+        <!-- Two Column Content Layout -->
+        <div class="grid grid-3-1 gap-4 align-start">
+          
+          <!-- Requirements Section (Left/Main Column) -->
+          <div class="requirements-wrapper">
+            
+            <!-- Required Documents Box -->
+            <div class="content-box mb-4">
+              <div class="content-box-header">
+                <div class="cbox-title">
+                  <span class="badge badge-required">Mandatory</span>
+                  <h3>Required Documents</h3>
+                </div>
+                <span class="cbox-subtitle" id="required-count-label">0 items</span>
+              </div>
+              <div class="checklist-items-group" id="required-items-list">
+                <!-- Checkboxes injected by JS -->
+              </div>
+            </div>
+
+            <!-- Optional Documents Box -->
+            <div class="content-box mb-4" id="optional-box-container">
+              <div class="content-box-header">
+                <div class="cbox-title">
+                  <span class="badge badge-optional">Optional / Recommended</span>
+                  <h3>Supplementary Documents</h3>
+                </div>
+                <span class="cbox-subtitle" id="optional-count-label">0 items</span>
+              </div>
+              <div class="checklist-items-group" id="optional-items-list">
+                <!-- Checkboxes injected by JS -->
+              </div>
+            </div>
+
+            <!-- Dedicated Bottom Final Readiness Summary Card -->
+            <div id="final-readiness-card-container" class="mb-4">
+              <!-- Rendered dynamically by JS -->
+            </div>
+
+          </div>
+
+          <!-- Side Panel / Notes (Right Column) -->
+          <div class="checklist-side-panel">
+            
+            <!-- Process Preparation Notes Card -->
+            <div class="content-box mb-4">
+              <div class="cbox-title mb-3">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-accent"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+                <h4 style="margin:0;">Preparation Notes</h4>
+              </div>
+              <ul class="prep-notes-list" id="checklist-prep-notes">
+                <!-- Notes injected by JS -->
+              </ul>
+            </div>
+
+            <!-- Quick Action Tools -->
+            <div class="content-box">
+              <h4 class="mb-3" style="margin-top:0;">Actions</h4>
+              <div class="action-btn-stack">
+                <button class="btn btn-outline btn-block" id="reset-current-checklist-btn">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 4v6h-6"></path><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path></svg>
+                  Reset Checklist
+                </button>
+                <button class="btn btn-secondary btn-block" id="print-checklist-btn">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
+                  Print / Save Summary
+                </button>
+                <button class="btn btn-outline btn-block" id="copy-summary-btn">
+                  📋 Copy Summary
+                </button>
+                <a href="#mydocuments" class="btn btn-primary btn-block" data-page="mydocuments">
+                  View My Documents
+                </a>
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+    </section>
+
+    <!-- PAGE 4: MY DOCUMENTS VAULT & REMINDERS -->
+    <section id="mydocuments" class="page-section">
+      <div class="container py-4">
+        <!-- Section Header -->
+        <div class="section-header">
+          <div class="badge badge-accent mb-2">Local Storage Vault</div>
+          <h1 class="page-headline">My Document Vault & Custom Checklists</h1>
+          <p class="page-subheadline">Record document formats, expiry dates, custom checklists, and track in-app reminders locally.</p>
+        </div>
+
+        <!-- In-App Reminders Section -->
+        <div id="in-app-reminders-container" class="mb-4">
+          <!-- Injected dynamically via JS -->
+        </div>
+
+        <!-- Privacy Assurance Banner -->
+        <div class="alert alert-success mb-4">
+          <div class="alert-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+          </div>
+          <div class="alert-content">
+            <strong>100% Local Browser Storage:</strong> Your saved document formats, expiry dates, and custom checklists are stored purely in your browser (`LocalStorage`). No files are uploaded to any server.
+          </div>
+        </div>
+
+        <!-- Add Document Box & Stats Grid -->
+        <div class="grid grid-3-1 gap-4 align-start mb-4">
+          
+          <!-- Add Custom Document Form -->
+          <div class="content-box">
+            <div class="cbox-title mb-3">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-accent"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+              <h3 style="margin:0;">Add Document Record</h3>
+            </div>
+            
+            <form id="add-document-form" class="vault-form">
+              <div class="form-row">
+                <div class="form-group flex-2">
+                  <label for="doc-title-input">Document Name <span class="text-danger">*</span></label>
+                  <input type="text" id="doc-title-input" class="form-input" placeholder="e.g. Passport, Aadhar Card, 10th Marksheet" required>
+                </div>
+                <div class="form-group flex-1">
+                  <label for="doc-category-select">Category</label>
+                  <select id="doc-category-select" class="form-select">
+                    <option value="Identity & Address">Identity & Address</option>
+                    <option value="Educational">Educational</option>
+                    <option value="Financial & Bank">Financial & Bank</option>
+                    <option value="Employment">Employment</option>
+                    <option value="Photos & Certificates">Photos & Certificates</option>
+                    <option value="General / Other">General / Other</option>
+                  </select>
+                </div>
+              </div>
+
+              <!-- Format Checklist Checkboxes -->
+              <div class="form-group mb-2">
+                <label>Formated Copies Available:</label>
+                <div class="format-checkbox-row">
+                  <label class="format-check-label">
+                    <input type="checkbox" id="doc-has-original" checked>
+                    <span>📄 Physical Original</span>
+                  </label>
+                  <label class="format-check-label">
+                    <input type="checkbox" id="doc-has-photocopy" checked>
+                    <span>🖨️ Printed Photocopy</span>
+                  </label>
+                  <label class="format-check-label">
+                    <input type="checkbox" id="doc-has-digital" checked>
+                    <span>📱 Digital Scan / PDF</span>
+                  </label>
+                </div>
+              </div>
+
+              <div class="form-row">
+                <div class="form-group flex-1">
+                  <label for="doc-expiry-input">Expiry Date (Optional)</label>
+                  <input type="date" id="doc-expiry-input" class="form-input">
+                </div>
+                <div class="form-group flex-2">
+                  <label for="doc-notes-input">Notes / Storage Location (Optional)</label>
+                  <input type="text" id="doc-notes-input" class="form-input" placeholder="e.g. Original in blue folder, 3 copies printed">
+                </div>
+                <div class="form-group flex-1">
+                  <label for="doc-status-select">Overall Status</label>
+                  <select id="doc-status-select" class="form-select">
+                    <option value="available">Available (Ready)</option>
+                    <option value="missing">Missing / Need to get</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="form-footer">
+                <button type="submit" class="btn btn-primary">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                  Save to Vault
+                </button>
+              </div>
+            </form>
+
+            <!-- One-Click Preset Chips -->
+            <div class="quick-presets-wrapper mt-4">
+              <span class="preset-label">Quick Add Common Documents:</span>
+              <div class="preset-chips-group" id="preset-chips-container">
+                <button type="button" class="chip-btn" data-doc="Aadhar Card" data-cat="Identity & Address">+ Aadhar Card</button>
+                <button type="button" class="chip-btn" data-doc="Passport Size Photos" data-cat="Photos & Certificates">+ Passport Photos</button>
+                <button type="button" class="chip-btn" data-doc="10th / 12th Marksheet" data-cat="Educational">+ 10th/12th Marksheet</button>
+                <button type="button" class="chip-btn" data-doc="PAN Card" data-cat="Identity & Address">+ PAN Card</button>
+                <button type="button" class="chip-btn" data-doc="Bank Passbook" data-cat="Financial & Bank">+ Bank Passbook</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Vault Summary Stats Widget -->
+          <div class="vault-stats-card">
+            <h4 class="mb-3">Vault Statistics</h4>
+            <div class="stat-mini-row">
+              <span class="stat-label">Total Registered</span>
+              <span class="stat-value" id="vault-stat-total">0</span>
+            </div>
+            <div class="stat-mini-row">
+              <span class="stat-label">Available (Ready)</span>
+              <span class="stat-value text-success" id="vault-stat-available">0</span>
+            </div>
+            <div class="stat-mini-row">
+              <span class="stat-label">Missing / Pending</span>
+              <span class="stat-value text-warning" id="vault-stat-missing">0</span>
+            </div>
+            <div class="stat-progress-bar mt-3">
+              <div class="stat-progress-fill" id="vault-stat-fill" style="width: 0%;"></div>
+            </div>
+            <small class="text-muted mt-2 block" id="vault-stat-text">0% ready</small>
+          </div>
+
+        </div>
+
+        <!-- Filter & Search Vault Items -->
+        <div class="vault-toolbar mb-4">
+          <div class="search-box">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="search-icon"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+            <input type="text" id="vault-search-input" placeholder="Search my saved documents..." aria-label="Search my saved documents">
+            <button class="clear-search-btn hidden" id="clear-vault-search" title="Clear search">×</button>
+          </div>
+
+          <div class="vault-status-filter">
+            <button class="vfilter-btn active" data-vfilter="all">All Documents</button>
+            <button class="vfilter-btn" data-vfilter="available">Available Only</button>
+            <button class="vfilter-btn" data-vfilter="missing">Missing Only</button>
+          </div>
+        </div>
+
+        <!-- Documents Items Grid -->
+        <div class="grid grid-2 gap-3 mb-5" id="vault-items-container">
+          <!-- Rendered dynamically via JS -->
+        </div>
+
+        <!-- Empty Vault State -->
+        <div class="empty-state hidden" id="vault-empty-state">
+          <div class="empty-icon">📁</div>
+          <h3 id="vault-empty-title">You haven't added any documents yet.</h3>
+          <p id="vault-empty-text">Add your common documents above or click any quick preset to start tracking what you have.</p>
+        </div>
+
+        <!-- Personal Custom Checklist Builder Section -->
+        <div class="content-box mb-4">
+          <div class="cbox-header-flex mb-3">
+            <div>
+              <span class="badge badge-accent mb-1">PERSONAL CHECKLIST BUILDER</span>
+              <h3 style="margin:0;">Custom Checklists</h3>
+            </div>
+          </div>
+          
+          <form id="create-custom-checklist-form" class="vault-form mb-4">
+            <div class="form-row">
+              <div class="form-group flex-2">
+                <label for="custom-title-input">New Checklist Name</label>
+                <input type="text" id="custom-title-input" class="form-input" placeholder="e.g. My Internship Onboarding Checklist" required>
+              </div>
+              <div class="form-group flex-1 align-self-end">
+                <button type="submit" class="btn btn-primary btn-block">Create Custom List</button>
+              </div>
+            </div>
+          </form>
+
+          <div id="custom-checklists-container">
+            <!-- Custom checklists injected by JS -->
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- PAGE 5: ABOUT & SETTINGS / DATA MANAGEMENT -->
+    <section id="about" class="page-section">
+      <div class="container py-4">
+        <!-- Section Header -->
+        <div class="section-header">
+          <div class="badge badge-accent mb-2">Project Overview & Data Management</div>
+          <h1 class="page-headline">About & Data Settings</h1>
+          <p class="page-subheadline">Empowering individuals with pre-visit clarity while giving complete control over your local browser data.</p>
+        </div>
+
+        <!-- Mission Card -->
+        <div class="content-box mb-4">
+          <div class="grid grid-2 gap-4 align-center">
+            <div>
+              <h2 class="mb-3">Our Mission</h2>
+              <p class="text-body mb-3">
+                Every day, students, job seekers, and citizens waste time standing in queues only to discover they forgot a photo, fee receipt, or self-attested photocopy.
+              </p>
+              <p class="text-body">
+                <strong>DocuReady</strong> was created to eliminate this frustration by providing clear, interactive pre-visit checklists for common administrative procedures.
+              </p>
+            </div>
+            <div class="about-hero-box">
+              <div class="about-stat-item">
+                <span class="astat-number">100%</span>
+                <span class="astat-label">Client-Side & Private</span>
+              </div>
+              <div class="about-stat-item">
+                <span class="astat-number">Zero</span>
+                <span class="astat-label">Server Uploads Required</span>
+              </div>
+              <div class="about-stat-item">
+                <span class="astat-number">Instant</span>
+                <span class="astat-label">Readiness Percentage</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Data Privacy Information Banner -->
+        <div class="alert alert-info mb-4">
+          <div class="alert-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+          </div>
+          <div class="alert-content">
+            <strong>Data Privacy Explanation:</strong> Your saved information is stored locally in this browser using LocalStorage. DocuReady Version 1 does not upload your document records to a server. Note that clearing your browser cache or site data will remove your locally stored records.
+          </div>
+        </div>
+
+        <!-- Settings & Local Data Management Box -->
+        <div class="content-box mb-5">
+          <h2 class="mb-3">Settings & Data Backup</h2>
+          <p class="text-muted mb-4">Export your document records and custom checklists to JSON for safe-keeping, or restore previously backed-up data.</p>
+          
+          <div class="grid grid-3 gap-3">
+            <div class="settings-action-card">
+              <h4>Export Backup</h4>
+              <p class="text-muted" style="font-size:0.85rem;">Download all saved data as a `.json` backup file.</p>
+              <button class="btn btn-outline btn-block mt-3" id="export-data-btn">📥 Export My Data (JSON)</button>
+            </div>
+
+            <div class="settings-action-card">
+              <h4>Restore Backup</h4>
+              <p class="text-muted" style="font-size:0.85rem;">Import previously exported JSON file to restore records.</p>
+              <label class="btn btn-outline btn-block mt-3" style="cursor:pointer;">
+                📤 Import My Data (JSON)
+                <input type="file" id="import-data-file" accept=".json" class="hidden">
+              </label>
+            </div>
+
+            <div class="settings-action-card">
+              <h4>Clear All Data</h4>
+              <p class="text-muted" style="font-size:0.85rem;">Permanently wipe all local storage records from browser.</p>
+              <button class="btn btn-outline btn-block mt-3 text-danger" id="clear-all-data-btn">🗑️ Clear All Local Data</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- FAQ Accordion -->
+        <div class="content-box mb-5">
+          <h2 class="mb-4">Frequently Asked Questions</h2>
+          <div class="faq-accordion-group">
+            
+            <div class="faq-item">
+              <button class="faq-question-btn">
+                <span>Are these document requirements official for all institutions?</span>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="faq-chevron"><polyline points="6 9 12 15 18 9"></polyline></svg>
+              </button>
+              <div class="faq-answer-content">
+                <p>No. DocuReady provides general preparation guidance. Requirements may vary by organization, location and process. Always verify the final requirements with the relevant organization.</p>
+              </div>
+            </div>
+
+            <div class="faq-item">
+              <button class="faq-question-btn">
+                <span>Are my personal documents uploaded to any server?</span>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="faq-chevron"><polyline points="6 9 12 15 18 9"></polyline></svg>
+              </button>
+              <div class="faq-answer-content">
+                <p>No! DocuReady does NOT upload or store actual files. All checklist progress and document records added to "My Documents" remain strictly in your browser's local storage (`LocalStorage`).</p>
+              </div>
+            </div>
+
+            <div class="faq-item">
+              <button class="faq-question-btn">
+                <span>Will my checklist progress remain if I refresh the browser?</span>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="faq-chevron"><polyline points="6 9 12 15 18 9"></polyline></svg>
+              </button>
+              <div class="faq-answer-content">
+                <p>Yes. As long as you use the same browser and do not clear browsing data, your checked items and document vault entries remain saved.</p>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- Technical Architecture Note -->
+        <div class="tech-note-card">
+          <div class="tnote-header">
+            <span class="badge badge-primary">Technical Overview</span>
+            <h3>Architecture & Student Developer Notes</h3>
+          </div>
+          <p class="mb-3">
+            DocuReady is engineered using pure <strong>HTML5, Vanilla CSS3, JavaScript (ES6+), and LocalStorage</strong> to deliver high performance, instant page switches, and zero external framework dependencies.
+          </p>
+          <div class="grid grid-2 gap-3 mt-3">
+            <div class="roadmap-block">
+              <h5>Current Architecture</h5>
+              <ul>
+                <li>✅ Client-side Hash Router (`location.hash`)</li>
+                <li>✅ LocalStorage Persistence & JSON Backup Engine</li>
+                <li>✅ Requirement Matcher & Format Tracker</li>
+                <li>✅ Pure CSS Design System & Print Engine</li>
+              </ul>
+            </div>
+            <div class="roadmap-block">
+              <h5>Future Upgrade Path</h5>
+              <ul>
+                <li>🚀 React / Vite Framework</li>
+                <li>🚀 Node.js / Database Cloud Integration</li>
+                <li>🚀 Printable PDF Generator</li>
+                <li>🚀 AI-Powered Document Verifier</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Footer -->
+  <footer class="main-footer">
+    <div class="container footer-container">
+      <div class="footer-brand-col">
+        <a href="#home" class="brand-logo footer-logo">
+          <div class="logo-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><path d="m9 15 2 2 4-4"></path></svg>
+          </div>
+          <span class="brand-name">Docu<span class="brand-highlight">Ready</span></span>
+        </a>
+        <p class="footer-tagline">Know what you need before you go.</p>
+        <p class="footer-disclaimer-sm">
+          <strong>Disclaimer:</strong> DocuReady provides general preparation guidance. Requirements may vary by organization, location and process. Always verify the final requirements with the relevant organization.
+        </p>
+      </div>
+
+      <div class="footer-links-col">
+        <h4>Navigation</h4>
+        <ul>
+          <li><a href="#home" data-page="home">Home</a></li>
+          <li><a href="#services" data-page="services">All Services</a></li>
+          <li><a href="#mydocuments" data-page="mydocuments">My Document Vault</a></li>
+          <li><a href="#about" data-page="about">About & Data</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-links-col">
+        <h4>Popular Categories</h4>
+        <ul>
+          <li><a href="#services" data-page="services" data-cat="college">College / University</a></li>
+          <li><a href="#services" data-page="services" data-cat="banking">Banking & KYC</a></li>
+          <li><a href="#services" data-page="services" data-cat="jobs">Jobs & Employment</a></li>
+          <li><a href="#services" data-page="services" data-cat="govt">Government Services</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <div class="container footer-bottom-inner">
+        <p>&copy; 2026 DocuReady. General document preparation assistant.</p>
+        <span class="footer-build-badge">v1.3 Vanilla Edition</span>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Main JavaScript File -->
+  <script src="script.js"></script>
+</body>
+</html>
